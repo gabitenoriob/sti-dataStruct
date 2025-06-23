@@ -1,7 +1,10 @@
 from fastapi import FastAPI
-from routes import alunos
+from routes import alunos, exercicios, testes
 
 app = FastAPI()
+app.include_router(alunos.router)
+app.include_router(exercicios.router)
+app.include_router(testes.router)
 
 # Incluindo as rotas
 app.include_router(alunos.router)
