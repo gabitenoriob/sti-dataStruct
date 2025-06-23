@@ -60,6 +60,17 @@ class Exercicio(Base):
         back_populates="exercicio_destino",
         foreign_keys="DependenciaExercicio.exercicio_destino_id"
     )
+    dependencias_estrutura_origem = relationship(
+        "DependenciaEstrutura",
+        back_populates="estrutura_origem",
+        foreign_keys="DependenciaEstrutura.estrutura_origem_id"
+    )
+    dependencias_estrutura_destino = relationship(
+        "DependenciaEstrutura",
+        back_populates="estrutura_destino",
+        foreign_keys="DependenciaEstrutura.estrutura_destino_id"
+    )
+    dicas = relationship("Dicas", back_populates="exercicio")
 
 
 class DependenciaExercicio(Base):
@@ -81,7 +92,23 @@ class DependenciaExercicio(Base):
         foreign_keys=[exercicio_destino_id]
     )
 
-    
+class DependenciaEstrutura(Base):
+    __tablename__ = 'dependencia_estrutura'
+    id = Column(Integer, primary_key=True)
+    estrutura_origem_id = Column(Integer, ForeignKey('estrutura_dado.id'))
+    estrutura_destino_id = Column(Integer, ForeignKey('estrutura_dado.id'))
+
+    estrutura_origem = relationship(
+        "EstruturaDeDado",
+        foreign_keys=[estrutura_origem_id]
+    )
+
+    estrutura_destino = relationship(
+        "EstruturaDeDado",
+        foreign_keys=[estrutura_destino_id]
+    )
+
+
 class CasoTeste(Base):
     __tablename__ = 'caso_teste'
     id = Column(Integer, primary_key=True)
@@ -148,6 +175,13 @@ class Complexidade(Base):
     id = Column(Integer, primary_key=True)
     tipo = Column(String)  
     valor_esperado = Column(String)
+
+class Dicas(Base):
+    __tablename__ = 'dicas'
+    id = Column(Integer, primary_key=True)
+    conteudo = Column(Text, nullable=False)
+    exercicio_id = Column(Integer, ForeignKey('exercicio.id'))
+    exercicio = relationship("Exercicio", back_populates="dicas")
 
 Base.metadata.create_all(engine)
 print("Tabelas criadas com sucesso!")
