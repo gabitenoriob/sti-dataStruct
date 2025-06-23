@@ -31,19 +31,12 @@ except Exception as e:
     print(f"Failed to connect: {e}")
     
 # Tabelas
-class CategoriaEstrutura(Base):
-    __tablename__ = 'categoria_estrutura'
-    id = Column(Integer, primary_key=True)
-    nome = Column(String, nullable=False)
-    estruturas = relationship("EstruturaDeDado", back_populates="categoria")
 
 class EstruturaDeDado(Base):
     __tablename__ = 'estrutura_dado'
     id = Column(Integer, primary_key=True)
     nome = Column(String, nullable=False)
     descricao = Column(Text)
-    categoria_id = Column(Integer, ForeignKey('categoria_estrutura.id'))
-    categoria = relationship("CategoriaEstrutura", back_populates="estruturas")
     exercicios = relationship("Exercicio", back_populates="estrutura")
 
 class Exercicio(Base):
@@ -56,7 +49,39 @@ class Exercicio(Base):
     estrutura = relationship("EstruturaDeDado", back_populates="exercicios")
     casos_teste = relationship("CasoTeste", back_populates="exercicio")
     tentativas = relationship("TentativaAluno", back_populates="exercicio")
+    dependencias_origem = relationship(
+        "DependenciaExercicio",
+        back_populates="exercicio_origem",
+        foreign_keys="DependenciaExercicio.exercicio_origem_id"
+    )
 
+    dependencias_destino = relationship(
+        "DependenciaExercicio",
+        back_populates="exercicio_destino",
+        foreign_keys="DependenciaExercicio.exercicio_destino_id"
+    )
+
+
+class DependenciaExercicio(Base):
+    __tablename__ = 'dependencia_exercicio'
+
+    id = Column(Integer, primary_key=True)
+    exercicio_origem_id = Column(Integer, ForeignKey('exercicio.id'))
+    exercicio_destino_id = Column(Integer, ForeignKey('exercicio.id'))
+
+    exercicio_origem = relationship(
+        "Exercicio",
+        back_populates="dependencias_origem",
+        foreign_keys=[exercicio_origem_id]
+    )
+
+    exercicio_destino = relationship(
+        "Exercicio",
+        back_populates="dependencias_destino",
+        foreign_keys=[exercicio_destino_id]
+    )
+
+    
 class CasoTeste(Base):
     __tablename__ = 'caso_teste'
     id = Column(Integer, primary_key=True)
