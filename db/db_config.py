@@ -51,6 +51,7 @@ class Exercicio(Base):
     id = Column(Integer, primary_key=True)
     enunciado = Column(Text, nullable=False)
     nivel_dificuldade = Column(String)
+    solucao_esperada = Column(Text)
     estrutura_id = Column(Integer, ForeignKey('estrutura_dado.id'))
     estrutura = relationship("EstruturaDeDado", back_populates="exercicios")
     casos_teste = relationship("CasoTeste", back_populates="exercicio")
