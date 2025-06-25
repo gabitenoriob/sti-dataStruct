@@ -10,8 +10,8 @@ def criar_exercicio(exercicio: ExercicioCreate):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO exercicio (enunciado, nivel_dificuldade, estrutura_id, solucao_esperada) VALUES (%s, %s, %s, %s)",
-            (exercicio.enunciado, exercicio.nivel_dificuldade, exercicio.estrutura_id, exercicio.solucao_esperada)
+            "INSERT INTO exercicio (enunciado, nivel_dificuldade, estrutura_id, solucao_esperada, dicas) VALUES (%s, %s, %s, %s, %s)",
+            (exercicio.enunciado, exercicio.nivel_dificuldade, exercicio.estrutura_id, exercicio.solucao_esperada, exercicio.dicas)
         )
         conn.commit()
         return {"status": "Exercício criado com sucesso!"}
