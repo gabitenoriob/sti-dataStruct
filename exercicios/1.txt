@@ -1,5 +1,6 @@
 Contains Duplicate
-
+Easy
+1
 Given an integer array nums, return true if any value appears more than once in the array, otherwise return false.
 
 Example 1:
@@ -36,3 +37,4 @@ We can use a hash data structure like a hash set or hash map to store elements w
 class Solution:
     def hasDuplicate(self, nums: List[int]) -> bool:
         return len(set(nums)) < len(nums)
+
