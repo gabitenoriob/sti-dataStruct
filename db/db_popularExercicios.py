@@ -107,7 +107,7 @@ def inserir_no_banco(lista_exercicios):
             """, (
                 ex["enunciado"],
                 ex["nivel_dificuldade"],
-                ex["solucao_ideal"],
+                ex["solucao_esperada"],
                 ex["estrutura_id"],
                 ex["tempo_ideal"],
                 ex["espaco_ideal"]
