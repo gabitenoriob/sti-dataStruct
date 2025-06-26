@@ -128,7 +128,7 @@ def inserir_no_banco(lista_exercicios):
             # Inserindo dicas
             for dica in ex["dicas"]:
                 cursor.execute("""
-                    INSERT INTO dica (texto, exercicio_id)
+                    INSERT INTO dicas (texto, exercicio_id)
                     VALUES (%s, %s)
                 """, (
                     dica.strip(),
