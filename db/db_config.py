@@ -49,6 +49,8 @@ class Exercicio(Base):
     estrutura = relationship("EstruturaDeDado", back_populates="exercicios")
     casos_teste = relationship("CasoTeste", back_populates="exercicio")
     tentativas = relationship("TentativaAluno", back_populates="exercicio")
+    tempo_ideal = Column(Integer, nullable=True)
+    espaco_ideal = Column(String, nullable=True)
     dependencias_origem = relationship(
         "DependenciaExercicio",
         back_populates="exercicio_origem",
