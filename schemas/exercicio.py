@@ -1,0 +1,26 @@
+from typing import Optional
+
+from pydantic import BaseModel
+
+
+class ExercicioBase(BaseModel):
+    enunciado: str
+    nivel_dificuldade: str
+    solucao_esperada: str
+    estrutura_id: int
+    tempo_ideal: Optional[str]
+    espaco_ideal: Optional[str]
+    dicas: Optional[list[str]] = []
+    casos_teste: Optional[list[dict]] = []  # Cada caso de teste é um dicionário com 'entrada' e 'saida_esperada'
+
+
+
+class ExercicioCreate(ExercicioBase):
+    pass
+
+
+class Exercicio(ExercicioBase):
+    id: int
+
+    class Config:
+        orm_mode = True

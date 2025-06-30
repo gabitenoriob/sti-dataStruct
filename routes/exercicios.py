@@ -1,22 +1,33 @@
-from fastapi import APIRouter, HTTPException
-from models.exercicio import ExercicioCreate
-from db import get_connection
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from db import get_db
+from schemas import exercicio
+from crud import  exercicios
 
-router = APIRouter()
+router = APIRouter(prefix="/exercicios", tags=["Exercícios"])
 
-@router.post("/exercicios/")
-def criar_exercicio(exercicio: ExercicioCreate):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO exercicio (enunciado, nivel_dificuldade, estrutura_id, solucao_esperada, dicas) VALUES (%s, %s, %s, %s, %s)",
-            (exercicio.enunciado, exercicio.nivel_dificuldade, exercicio.estrutura_id, exercicio.solucao_esperada, exercicio.dicas)
-        )
-        conn.commit()
-        return {"status": "Exercício criado com sucesso!"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
+
+@router.post("/", response_model=exercicio.Exercicio)
+def create(exercicio: exercicio.ExercicioCreate, db: Session = Depends(get_db)):
+    return exercicios.create_exercicio(db, exercicio)
+
+
+@router.get("/", response_model=list[exercicio.Exercicio])
+def read(db: Session = Depends(get_db)):
+    return exercicios.get_exercicios(db)
+
+
+@router.get("/{id}", response_model=exercicio.Exercicio)
+def read_one(id: int, db: Session = Depends(get_db)):
+    db_item = exercicios.get_exercicio(db, id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Exercício não encontrado")
+    return db_item
+
+
+@router.delete("/{id}")
+def delete(id: int, db: Session = Depends(get_db)):
+    db_item = exercicios.delete_exercicio(db, id)
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Exercício não encontrado")
+    return {"ok": True}

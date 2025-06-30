@@ -1,14 +1,17 @@
 from fastapi import FastAPI
-from routes import alunos, exercicios, insert_generico, testes
+from db import Base, engine
+from routes import alunos, exercicios
 
-app = FastAPI()
+# Criação das tabelas
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="STI de Estruturas de Dados", version="1.0")
+
+# Registrar rotas
 app.include_router(alunos.router)
 app.include_router(exercicios.router)
-app.include_router(testes.router)
-app.include_router(insert_generico.router)
 
-# Incluindo as rotas
-app.include_router(alunos.router)
+
 @app.get("/")
 def read_root():
-    return {"message": "Bem-vindo à API de Estruturas de Dados!"}
+    return {"message": "STI rodando! Bora codar estrutura de dados"}
