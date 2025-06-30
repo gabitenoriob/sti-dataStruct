@@ -1,23 +1,42 @@
-def avaliar_codigo(codigo: str, casos_teste: list) -> str:
-    try:
-        for caso in casos_teste:
-            entrada = caso["entrada"]
-            esperado = caso["saida_esperada"]
 
-            local_vars = {}
-            exec(codigo, {}, local_vars)
+import datetime
+from models import Exercicio, TentativaAluno
+from db.db_config import get_db
+from sqlalchemy.orm import Session
 
-            if 'Solution' not in local_vars:
-                return "Classe Solution não encontrada"
 
-            sol = local_vars['Solution']()
+def avaliar_tentativa(db: Session, tentativa_id: int, sucesso: bool):
+    tentativa = db.query(TentativaAluno).filter(TentativaAluno.id == tentativa_id).first()
+    if not tentativa:
+        raise Exception("Tentativa não encontrada.")
 
-            exec_entrada = eval(entrada)
-            resultado = sol.hasDuplicate(exec_entrada)
+    if sucesso:
+        tentativa.concluido = True
+        tentativa.data_conclusao = datetime.now()
+    else:
+        tentativa.concluido = False
 
-            if str(resultado).lower() != esperado.lower():
-                return f"Erro no teste com entrada {entrada}"
+    db.commit()
+    db.refresh(tentativa)
 
-        return "Sucesso"
-    except Exception as e:
-        return f"Erro na execução: {str(e)}"
+    return tentativa
+
+
+def pode_fazer_exercicio(db: Session, aluno_id: int, exercicio: Exercicio) -> bool:
+    dependencias = exercicio.dependencias_origem
+    if not dependencias:
+        return True  # Sem dependências, pode fazer
+
+    for dep in dependencias:
+        tentativa = (
+            db.query(TentativaAluno)
+            .filter(
+                TentativaAluno.aluno_id == aluno_id,
+                TentativaAluno.exercicio_id == dep.exercicio_destino_id,
+                TentativaAluno.concluido == True,
+            )
+            .first()
+        )
+        if not tentativa:
+            return False
+    return True

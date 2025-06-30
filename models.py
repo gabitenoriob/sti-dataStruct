@@ -1,5 +1,5 @@
 from db.db_config import Base, get_db
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text, create_engine
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, Text, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 from dotenv import load_dotenv
 import os
@@ -14,18 +14,26 @@ class EstruturaDeDado(Base):
     descricao = Column(Text)
     exercicios = relationship("Exercicio", back_populates="estrutura")
 
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy.orm import relationship
+from db.db_config import Base
+
+
 class Exercicio(Base):
     __tablename__ = 'exercicio'
+
     id = Column(Integer, primary_key=True)
     enunciado = Column(Text, nullable=False)
     nivel_dificuldade = Column(String)
     solucao_esperada = Column(Text)
+
     estrutura_id = Column(Integer, ForeignKey('estrutura_dado.id'))
     estrutura = relationship("EstruturaDeDado", back_populates="exercicios")
-    casos_teste = relationship("CasoTeste", back_populates="exercicio")
-    tentativas = relationship("TentativaAluno", back_populates="exercicio")
+
     tempo_ideal = Column(Integer, nullable=True)
     espaco_ideal = Column(String, nullable=True)
+
+    # Dependências entre exercícios
     dependencias_origem = relationship(
         "DependenciaExercicio",
         back_populates="exercicio_origem",
@@ -37,16 +45,12 @@ class Exercicio(Base):
         back_populates="exercicio_destino",
         foreign_keys="DependenciaExercicio.exercicio_destino_id"
     )
-    dependencias_estrutura_origem = relationship(
-        "DependenciaEstrutura",
-        back_populates="estrutura_origem",
-        foreign_keys="DependenciaEstrutura.estrutura_origem_id"
-    )
-    dependencias_estrutura_destino = relationship(
-        "DependenciaEstrutura",
-        back_populates="estrutura_destino",
-        foreign_keys="DependenciaEstrutura.estrutura_destino_id"
-    )
+
+    # Tentativas e Casos de Teste
+    tentativas = relationship("TentativaAluno", back_populates="exercicio")
+    casos_teste = relationship("CasoTeste", back_populates="exercicio")
+
+    # Dicas
     dicas = relationship("Dicas", back_populates="exercicio")
 
 
@@ -69,8 +73,10 @@ class DependenciaExercicio(Base):
         foreign_keys=[exercicio_destino_id]
     )
 
+
 class DependenciaEstrutura(Base):
     __tablename__ = 'dependencia_estrutura'
+
     id = Column(Integer, primary_key=True)
     estrutura_origem_id = Column(Integer, ForeignKey('estrutura_dado.id'))
     estrutura_destino_id = Column(Integer, ForeignKey('estrutura_dado.id'))
@@ -86,6 +92,7 @@ class DependenciaEstrutura(Base):
     )
 
 
+
 class CasoTeste(Base):
     __tablename__ = 'caso_teste'
     id = Column(Integer, primary_key=True)
@@ -98,7 +105,7 @@ class Aluno(Base):
     __tablename__ = 'aluno'
     id = Column(Integer, primary_key=True)
     nome = Column(String, nullable=False)
-    nivel_conhecimento = Column(String)
+    nivel_conhecimento = Column(Integer, nullable=False, default=1)
     historico = relationship("HistoricoDesempenho", back_populates="aluno")
     tentativas = relationship("TentativaAluno", back_populates="aluno")
 
@@ -120,6 +127,8 @@ class TentativaAluno(Base):
     aluno = relationship("Aluno", back_populates="tentativas")
     exercicio = relationship("Exercicio", back_populates="tentativas")
     codigos = relationship("CodigoSubmetido", back_populates="tentativa")
+    concluido = Column(Boolean, default=False)
+
 
 class CodigoSubmetido(Base):
     __tablename__ = 'codigo_submetido'

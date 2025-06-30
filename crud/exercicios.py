@@ -1,27 +1,25 @@
 from sqlalchemy.orm import Session
-from models import Exercicio
-from schemas.exercicio import ExercicioCreate
-
-
-def create_exercicio(db: Session, exercicio: ExercicioCreate):
-    db_exercicio = Exercicio(**exercicio.dict())
-    db.add(db_exercicio)
-    db.commit()
-    db.refresh(db_exercicio)
-    return db_exercicio
-
-
-def get_exercicios(db: Session):
-    return db.query(Exercicio).all()
+from models import Exercicio, DependenciaExercicio
+from models import DependenciaEstrutura
 
 
 def get_exercicio(db: Session, exercicio_id: int):
     return db.query(Exercicio).filter(Exercicio.id == exercicio_id).first()
 
 
-def delete_exercicio(db: Session, exercicio_id: int):
+def get_dependencias_exercicio(db: Session, exercicio_id: int):
+    return db.query(DependenciaExercicio).filter(
+        DependenciaExercicio.exercicio_destino_id == exercicio_id
+    ).all()
+
+
+def get_dependencias_estrutura(db: Session, exercicio_id: int):
     exercicio = get_exercicio(db, exercicio_id)
-    if exercicio:
-        db.delete(exercicio)
-        db.commit()
-    return exercicio
+    if exercicio is None:
+        return []
+
+    dependencias = db.query(DependenciaEstrutura).filter(
+        DependenciaEstrutura.estrutura_origem_id == exercicio.estrutura_id
+    ).all()
+
+    return dependencias
