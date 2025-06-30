@@ -38,23 +38,8 @@ def extrair_dados(texto):
     nome = linhas[0].strip() if len(linhas) >= 1 else "Sem Nome"
     nivel_dificuldade = linhas[1].strip() if len(linhas) >= 2 else "Sem dificuldade"
     estrutura_id = linhas[2].strip() if len(linhas) >= 3 else "Sem estrutura"
-
-    if estrutura_id.lower() == "array":
-        estrutura_id = 1
-    elif estrutura_id.lower() == "linked list":
-        estrutura_id = 2
-    elif estrutura_id.lower() == "stack":
-        estrutura_id = 3
-    elif estrutura_id.lower() == "queue":
-        estrutura_id = 4
-    elif estrutura_id.lower() == "tree":
-        estrutura_id = 5
-    elif estrutura_id.lower() == "graph":
-        estrutura_id = 6
-    elif estrutura_id.lower() == "hash table":
-        estrutura_id = 7
-    else:
-        estrutura_id = None
+    estrutura_id = int(estrutura_id) if estrutura_id.isdigit() else None
+    
 
     enunciado_match = re.search(r'(?:\n\n)(.*?)(?:\n\nExample)', texto, re.DOTALL)
     enunciado = enunciado_match.group(1).strip() if enunciado_match else ""
