@@ -1,4 +1,5 @@
 from typing import Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -10,8 +11,8 @@ class ExercicioBase(BaseModel):
     estrutura_id: int
     tempo_ideal: Optional[str]
     espaco_ideal: Optional[str]
-    dicas: Optional[list[str]] = []
-    casos_teste: Optional[list[dict]] = []  # Cada caso de teste é um dicionário com 'entrada' e 'saida_esperada'
+    dicas: Optional[List[str]] = []
+    casos_teste: Optional[List[dict]] = []  # Cada caso de teste é um dicionário com 'entrada' e 'saida_esperada'
 
 
 

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from db import get_db
-from schemas import Aluno, AlunoCreate
+from db.db_config import get_db
+from schemas.aluno import Aluno, AlunoCreate
 from crud import alunos as crud_alunos
+from typing import List
+
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
 
@@ -12,7 +14,7 @@ def create_aluno(aluno: AlunoCreate, db: Session = Depends(get_db)):
     return crud_alunos.create_aluno(db, aluno)
 
 
-@router.get("/", response_model=list[Aluno])
+@router.get("/", response_model=List[Aluno])
 def read_alunos(db: Session = Depends(get_db)):
     return crud_alunos.get_alunos(db)
 

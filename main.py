@@ -1,6 +1,7 @@
+from unittest.mock import Base
 from fastapi import FastAPI
-from db import Base, engine
 from routes import alunos, exercicios
+from db.db_config import engine, Base
 
 # Criação das tabelas
 Base.metadata.create_all(bind=engine)

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import Exercicio
-from schemas import ExercicioCreate
+from schemas.exercicio import ExercicioCreate
 
 
 def create_exercicio(db: Session, exercicio: ExercicioCreate):

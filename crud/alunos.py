@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import Aluno
-from schemas import AlunoCreate
+from schemas.aluno import AlunoCreate
 
 
 def create_aluno(db: Session, aluno: AlunoCreate):

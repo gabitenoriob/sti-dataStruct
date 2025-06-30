@@ -1,18 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from db import get_db
+from db.db_config import get_db
 from schemas import exercicio
 from crud import  exercicios
 
 router = APIRouter(prefix="/exercicios", tags=["Exercícios"])
 
+from typing import List
 
 @router.post("/", response_model=exercicio.Exercicio)
 def create(exercicio: exercicio.ExercicioCreate, db: Session = Depends(get_db)):
     return exercicios.create_exercicio(db, exercicio)
 
 
-@router.get("/", response_model=list[exercicio.Exercicio])
+@router.get("/", response_model=List[exercicio.Exercicio])
 def read(db: Session = Depends(get_db)):
     return exercicios.get_exercicios(db)
 
