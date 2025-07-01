@@ -38,9 +38,13 @@ def delete_aluno(aluno_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
     return {"ok": True}
 
-#submeter codigo do exercicio do aluno
 @router.post("/{aluno_id}/exercicios/{exercicio_id}/resolver")
-def corrigir_exercicio(aluno_id: int, exercicio_id: int, db: Session, codigo: str = ""):
+def corrigir_exercicio(
+    aluno_id: int,
+    exercicio_id: int,
+    codigo: str, 
+    db: Session = Depends(get_db) 
+):
     """
     Endpoint para corrigir o código de um exercício submetido por um aluno.
     """
@@ -48,11 +52,17 @@ def corrigir_exercicio(aluno_id: int, exercicio_id: int, db: Session, codigo: st
     if db_aluno is None:
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
 
-    avaliacao = avaliar_tentativa(exercicio_id=exercicio_id, aluno_id=aluno_id, db=db)
+    passou, pontos_ganhos = avaliar_tentativa(db=db, exercicio_id=exercicio_id, aluno_id=aluno_id, codigo_aluno=codigo)
+
     feedback = fornecer_feedback_aluno(exercicio_id=exercicio_id, resposta_aluno=codigo)
 
-    return {"aluno_id": aluno_id, "exercicio_id": exercicio_id, "feedback": feedback}
-
+    return {
+        "aluno_id": aluno_id,
+        "exercicio_id": exercicio_id,
+        "passou_testes": passou,
+        "pontos_ganhos": pontos_ganhos,
+        "feedback": feedback
+    }
 
 #pedir resolucao do exercicio
 @router.post("/{aluno_id}/exercicios/{exercicio_id}/submeter")

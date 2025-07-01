@@ -1,8 +1,8 @@
 import os
-from google import genai
+import google.generativeai as genai
 from sqlalchemy.orm import Session
 from db.db_config import get_db
-from models import Exercicio, CasoTeste
+from models import Dicas, Exercicio, CasoTeste
 from dotenv import load_dotenv
 
 # Carrega as variáveis de ambiente do arquivo .env

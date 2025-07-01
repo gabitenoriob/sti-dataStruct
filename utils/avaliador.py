@@ -2,6 +2,7 @@
 import datetime
 from models import Exercicio, TentativaAluno
 from db.db_config import get_db
+from typing import Tuple 
 from sqlalchemy.orm import Session
 
 import sys
@@ -57,37 +58,66 @@ def parse_entrada(entrada_str: str):
         raise HTTPException(status_code=400, detail=f"Erro ao processar a entrada: {e}")
 
 
-def avaliar_tentativa(db: Session, tentativa_id: int, aluno_id: int):
-    tentativa = db.query(TentativaAluno).filter(TentativaAluno.id == tentativa_id).first()
+def avaliar_tentativa(db: Session, exercicio_id: int, aluno_id: int, codigo_aluno: str) -> Tuple[bool, int]:
+    """
+    Avalia o código submetido por um aluno para um exercício específico.
 
-    if not tentativa:
-        raise HTTPException(status_code=404, detail="Tentativa não encontrada.")
+    Args:
+        db: A sessão do banco de dados.
+        exercicio_id: O ID do exercício a ser avaliado.
+        aluno_id: O ID do aluno que submeteu o código.
+        codigo_aluno: O código Python submetido pelo aluno.
 
-    exercicio = tentativa.exercicio
-    casos_teste = db.query(CasoTeste).filter(CasoTeste.exercicio_id == exercicio.id).all()
+    Returns:
+        Uma tupla contendo:
+        - um booleano (True se o código passar em todos os testes, False caso contrário)
+        - um inteiro (os pontos ganhos: 10 se passar de primeira, 0 caso contrário)
+    """
+    exercicio = db.query(Exercicio).filter(Exercicio.id == exercicio_id).first()
+    if not exercicio:
+        raise HTTPException(status_code=404, detail="Exercício não encontrado.")
 
+    casos_teste = db.query(CasoTeste).filter(CasoTeste.exercicio_id == exercicio_id).all()
     if not casos_teste:
-        raise HTTPException(status_code=404, detail="Nenhum caso de teste encontrado.")
+        raise HTTPException(status_code=404, detail="Nenhum caso de teste encontrado para este exercício.")
 
     try:
         passou_todos = True
         for caso in casos_teste:
             entrada = parse_entrada(caso.entrada)
-
-            output = executar_codigo(tentativa.codigo_enviado, entrada)
+            output = executar_codigo(codigo_aluno, entrada)
 
             if str(output).strip().lower() != str(caso.saida_esperada).strip().lower():
                 passou_todos = False
                 break
 
-        tentativa.concluido = passou_todos
-        db.commit()
-        db.refresh(tentativa)
+        tentativas_anteriores = db.query(TentativaAluno).filter(
+            TentativaAluno.aluno_id == aluno_id,
+            TentativaAluno.exercicio_id == exercicio_id
+        ).count()
 
-        return tentativa
+        pontos = 0
+        if passou_todos:
+            if tentativas_anteriores == 0:
+                pontos = 10
+            else:
+                pontos = 0
+
+        nova_tentativa = TentativaAluno(
+            aluno_id=aluno_id,
+            exercicio_id=exercicio_id,
+            codigo_enviado=codigo_aluno,
+            concluido=passou_todos
+        )
+        db.add(nova_tentativa)
+        db.commit()
+        db.refresh(nova_tentativa)
+
+        return passou_todos, pontos
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Avaliação falhou: {e}")
+        raise HTTPException(status_code=400, detail=f"Erro durante a execução ou avaliação do código: {e}")
+
 
 
 def pode_fazer_exercicio(db: Session, aluno_id: int, exercicio: Exercicio) -> bool:
