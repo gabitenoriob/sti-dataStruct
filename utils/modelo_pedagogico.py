@@ -39,6 +39,8 @@ def fornecer_feedback_aluno(exercicio_id: int, resposta_aluno: str) -> str:
 
         casos = db.query(CasoTeste).filter(CasoTeste.exercicio_id == exercicio_id).all()
         casos_texto = "\n".join([f"Input: {c.entrada} -> Saída Esperada: {c.saida_esperada}" for c in casos])
+        dicas = db.query(Dicas).filter(Dicas.exercicio_id == exercicio_id).first()
+        dicas_texto = dicas.texto if dicas else "Nenhuma dica disponível para este exercício."
 
         # 2. PROMPT ENGINEERING: A parte mais importante!
         # Damos ao modelo uma persona (tutor), o contexto completo (problema, solução, testes)
@@ -57,6 +59,8 @@ def fornecer_feedback_aluno(exercicio_id: int, resposta_aluno: str) -> str:
             **CASOS DE TESTE:**
             {casos_texto}
             ---
+            **DICAS**
+            {dicas_texto}
             **SOLUÇÃO IDEAL (PARA SUA REFERÊNCIA INTERNA - NÃO MOSTRE AO ALUNO):**
             ```python
             {exercicio.solucao_esperada}

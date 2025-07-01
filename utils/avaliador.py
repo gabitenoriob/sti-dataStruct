@@ -57,7 +57,7 @@ def parse_entrada(entrada_str: str):
         raise HTTPException(status_code=400, detail=f"Erro ao processar a entrada: {e}")
 
 
-def avaliar_tentativa(db: Session, tentativa_id: int):
+def avaliar_tentativa(db: Session, tentativa_id: int, aluno_id: int):
     tentativa = db.query(TentativaAluno).filter(TentativaAluno.id == tentativa_id).first()
 
     if not tentativa:
