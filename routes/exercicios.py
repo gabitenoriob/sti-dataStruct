@@ -12,7 +12,11 @@ from typing import List
 
 @router.post("/", response_model=exercicio.Exercicio)
 def create(exercicio: exercicio.ExercicioCreate, db: Session = Depends(get_db)):
-    return exercicios.create_exercicio(db, exercicio)
+    try:
+        return exercicios.create_exercicio(db=db, exercicio=exercicio)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 
 @router.get("/", response_model=List[exercicio.Exercicio])
@@ -50,3 +54,4 @@ def listar_exercicios_disponiveis(aluno_id: int, db: Session = Depends(get_db)):
             })
 
     return liberados
+

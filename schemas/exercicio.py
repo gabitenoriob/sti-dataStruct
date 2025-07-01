@@ -3,6 +3,10 @@ from typing import List
 
 from pydantic import BaseModel
 
+class CasoTesteSchema(BaseModel):
+    entrada: str
+    saida_esperada: str
+
 
 class ExercicioBase(BaseModel):
     enunciado: str
@@ -12,7 +16,8 @@ class ExercicioBase(BaseModel):
     tempo_ideal: Optional[str]
     espaco_ideal: Optional[str]
     dicas: Optional[List[str]] = []
-    casos_teste: Optional[List[dict]] = []  # Cada caso de teste é um dicionário com 'entrada' e 'saida_esperada'
+    casos_teste: Optional[List[CasoTesteSchema]] = []
+
 
 
 

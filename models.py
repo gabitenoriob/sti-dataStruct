@@ -30,7 +30,7 @@ class Exercicio(Base):
     estrutura_id = Column(Integer, ForeignKey('estrutura_dado.id'))
     estrutura = relationship("EstruturaDeDado", back_populates="exercicios")
 
-    tempo_ideal = Column(Integer, nullable=True)
+    tempo_ideal = Column(String, nullable=True)
     espaco_ideal = Column(String, nullable=True)
 
     # Dependências entre exercícios
