@@ -38,8 +38,8 @@ def delete_aluno(aluno_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
     return {"ok": True}
 
-@router.post("/{aluno_id}/exercicios/{exercicio_id}/resolver")
-def corrigir_exercicio(
+@router.post("/{aluno_id}/exercicios/{exercicio_id}/avaliar_solucao")
+def avaliar_exercicio(
     aluno_id: int,
     exercicio_id: int,
     codigo: str, 
@@ -64,9 +64,9 @@ def corrigir_exercicio(
         "feedback": feedback
     }
 
-#pedir resolucao do exercicio
-@router.post("/{aluno_id}/exercicios/{exercicio_id}/submeter")
-def submeter_exercicio(aluno_id: int, exercicio_id: int, codigo: str, db: Session = Depends(get_db)):
+#pedir resolucao do exercicio   
+@router.post("/{aluno_id}/exercicios/{exercicio_id}/resolver")
+def resolver_exercicio(aluno_id: int, exercicio_id: int, codigo: str, db: Session = Depends(get_db)):
     """Endpoint para submeter o código de um exercício por um aluno.
     """
     db_aluno = crud_alunos.get_aluno(db, aluno_id)
