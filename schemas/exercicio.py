@@ -26,13 +26,9 @@ class ExercicioBase(BaseModel):
     estrutura_id: int
     tempo_ideal: Optional[str]
     espaco_ideal: Optional[str]
-    dicas: Optional[List[DicaSchema]] = None
-    casos_teste: Optional[List[CasoTesteSchema]] = None
-
-    class Config:
-        from_atributtes = True
-
-
+    pontuacao_minima: int #new
+    dicas: Optional[List[DicaSchema]] = []
+    casos_teste: Optional[List[CasoTesteSchema]] = []
 
 
 class ExercicioCreate(ExercicioBase):
