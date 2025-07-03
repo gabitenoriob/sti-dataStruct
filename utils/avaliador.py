@@ -6,6 +6,20 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from models import Exercicio, CasoTeste, TentativaAluno
+def reformatar_codigo(codigo: str) -> str:
+    # Se tudo estiver em uma linha, adiciona quebra de linha após os dois-pontos
+    codigo = re.sub(r'(class\s+\w+\s*:\s*)', r'\1\n    ', codigo)
+    codigo = re.sub(r'(def\s+\w+\s*\([^\)]*\)\s*->\s*\w+\s*:)', r'\1\n        ', codigo)
+
+    # Garante indentação mínima
+    linhas = codigo.split('\n')
+    linhas_formatadas = []
+    for linha in linhas:
+        if linha.strip().startswith("return") and not linha.startswith(" "):
+            linha = "        " + linha
+        linhas_formatadas.append(linha)
+
+    return "\n".join(linhas_formatadas)
 
 def detectar_metodo(codigo: str) -> str:
     """Detecta o nome do primeiro método da classe Solution no código do aluno."""
@@ -17,20 +31,24 @@ def detectar_metodo(codigo: str) -> str:
 def executar_codigo(codigo_aluno: str, entrada: any) -> str:
     """Executa o código do aluno com a entrada fornecida usando subprocess e retorna a saída."""
     try:
+        codigo_aluno = codigo_aluno.encode().decode('unicode_escape')
+
         metodo = detectar_metodo(codigo_aluno)
 
-        if isinstance(entrada, (list, tuple)):
-            entrada_formatada = repr(tuple(entrada))
+        if isinstance(entrada, tuple):
+            entrada_para_funcao = ', '.join(repr(arg) for arg in entrada)
         else:
-            entrada_formatada = f"({repr(entrada)},)"
+            entrada_para_funcao = repr(entrada)
 
+        codigo_aluno = reformatar_codigo(codigo_aluno)
         codigo_execucao = f"""
+from typing import *
 
 {codigo_aluno}
 
 if __name__ == "__main__":
     sol = Solution()
-    resultado = sol.{metodo}{entrada_formatada}
+    resultado = sol.{metodo}({entrada_para_funcao})
     print(resultado)
 """
 

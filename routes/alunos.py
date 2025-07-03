@@ -54,14 +54,12 @@ def avaliar_exercicio(
 
     passou, pontos_ganhos = avaliar_tentativa(db=db, exercicio_id=exercicio_id, aluno_id=aluno_id, codigo_aluno=codigo)
 
-    feedback = fornecer_feedback_aluno(exercicio_id=exercicio_id, resposta_aluno=codigo)
 
     return {
         "aluno_id": aluno_id,
         "exercicio_id": exercicio_id,
         "passou_testes": passou,
         "pontos_ganhos": pontos_ganhos,
-        "feedback": feedback
     }
 
 #pedir resolucao do exercicio   
