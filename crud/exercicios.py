@@ -58,3 +58,7 @@ def create_exercicio(db: Session, exercicio: ExercicioCreate):
 
     db.commit()
     return novo_exercicio
+
+#get all exercicios
+def get_exercicios(db: Session):
+    return db.query(Exercicio).all()

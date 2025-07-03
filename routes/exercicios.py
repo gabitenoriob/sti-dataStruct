@@ -19,9 +19,12 @@ def create(exercicio: exercicio.ExercicioCreate, db: Session = Depends(get_db)):
 
 
 
-@router.get("/", response_model=List[exercicio.Exercicio])
+@router.get("/", response_model= List[exercicio.Exercicio])
 def read(db: Session = Depends(get_db)):
-    return exercicios.get_exercicios(db)
+    all_exercicios = exercicios.get_exercicios(db)
+    print("Dados retornados por get_exercicios:", all_exercicios) 
+    return all_exercicios 
+
 
 
 @router.get("/{id}", response_model=exercicio.Exercicio)
