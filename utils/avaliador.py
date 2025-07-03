@@ -5,13 +5,14 @@ import textwrap
 from typing import Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from models import Exercicio, CasoTeste, TentativaAluno
+from models import Exercicio, CasoTeste, TentativaAluno, Aluno
+from pontuacao import update_pontuacao, calcular_pontuacao
+
+
 def reformatar_codigo(codigo: str) -> str:
-    # Se tudo estiver em uma linha, adiciona quebra de linha após os dois-pontos
     codigo = re.sub(r'(class\s+\w+\s*:\s*)', r'\1\n    ', codigo)
     codigo = re.sub(r'(def\s+\w+\s*\([^\)]*\)\s*->\s*\w+\s*:)', r'\1\n        ', codigo)
 
-    # Garante indentação mínima
     linhas = codigo.split('\n')
     linhas_formatadas = []
     for linha in linhas:
@@ -21,18 +22,17 @@ def reformatar_codigo(codigo: str) -> str:
 
     return "\n".join(linhas_formatadas)
 
+
 def detectar_metodo(codigo: str) -> str:
-    """Detecta o nome do primeiro método da classe Solution no código do aluno."""
     match = re.search(r"def\s+(\w+)\s*\(", codigo)
     if match:
         return match.group(1)
     raise ValueError("Nenhum método encontrado no código.")
 
+
 def executar_codigo(codigo_aluno: str, entrada: any) -> str:
-    """Executa o código do aluno com a entrada fornecida usando subprocess e retorna a saída."""
     try:
         codigo_aluno = codigo_aluno.encode().decode('unicode_escape')
-
         metodo = detectar_metodo(codigo_aluno)
 
         if isinstance(entrada, tuple):
@@ -73,15 +73,15 @@ if __name__ == "__main__":
     except Exception as e:
         raise RuntimeError(f"Erro durante execução: {e}")
 
+
 def parse_entrada(entrada_str: str):
-    """Converte a string de entrada salva no banco em uma estrutura Python válida."""
     try:
         return eval(entrada_str, {"__builtins__": {}})
     except Exception as e:
         raise ValueError(f"Erro ao interpretar a entrada: {e}")
 
+
 def avaliar_tentativa(db: Session, exercicio_id: int, aluno_id: int, codigo_aluno: str) -> Tuple[bool, int]:
-    """Avalia se o código do aluno passa em todos os testes. Retorna se passou e os pontos."""
     print(f"Código do aluno recebido:\n{codigo_aluno}")
 
     exercicio = db.query(Exercicio).filter(Exercicio.id == exercicio_id).first()
@@ -108,7 +108,11 @@ def avaliar_tentativa(db: Session, exercicio_id: int, aluno_id: int, codigo_alun
             TentativaAluno.exercicio_id == exercicio_id
         ).count()
 
-        pontos = 10 if passou_todos and tentativas_anteriores == 0 else 0
+        pontos = 0
+        if passou_todos and tentativas_anteriores == 0:
+            aluno = db.query(Aluno).get(aluno_id)
+            update_pontuacao(db, aluno=aluno, exercicio=exercicio)
+            pontos = calcular_pontuacao(exercicio)
 
         nova_tentativa = TentativaAluno(
             aluno_id=aluno_id,
@@ -128,7 +132,7 @@ def avaliar_tentativa(db: Session, exercicio_id: int, aluno_id: int, codigo_alun
 def pode_fazer_exercicio(db: Session, aluno_id: int, exercicio: Exercicio) -> bool:
     dependencias = exercicio.dependencias_origem
     if not dependencias:
-        return True  
+        return True
 
     for dep in dependencias:
         tentativa = (
