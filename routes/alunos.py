@@ -73,9 +73,9 @@ def resolver_exercicio(aluno_id: int, exercicio_id: int, codigo: str, db: Sessio
     if db_aluno is None:
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
 
-    resolucao = gerar_codigo(exercicio_id=exercicio_id)
+    resolucao, resultado_execucao = gerar_codigo(exercicio_id=exercicio_id)
 
-    return {"aluno_id": aluno_id, "exercicio_id": exercicio_id, "codigo_submetido": codigo, "resolucao": resolucao}
+    return {"aluno_id": aluno_id, "exercicio_id": exercicio_id, "codigo_submetido": codigo, "resolucao": resolucao, "resultado_execucao": resultado_execucao}
 
 #pedir dicas e feedback do aluno em relaçaõ a 1 exercicio específico
 @router.post("/{aluno_id}/feedback")
