@@ -5,6 +5,8 @@ from typing import Optional, List
 class AlunoBase(BaseModel):
     nome: str
     nivel_conhecimento: Optional[str] = None
+    pontuacao_total: int = 0  #new
+
 
 
 class AlunoCreate(AlunoBase):

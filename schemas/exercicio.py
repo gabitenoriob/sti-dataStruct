@@ -15,10 +15,9 @@ class ExercicioBase(BaseModel):
     estrutura_id: int
     tempo_ideal: Optional[str]
     espaco_ideal: Optional[str]
+    pontuacao_minima: int #new
     dicas: Optional[List[str]] = []
     casos_teste: Optional[List[CasoTesteSchema]] = []
-
-
 
 
 class ExercicioCreate(ExercicioBase):

@@ -26,6 +26,7 @@ class Exercicio(Base):
     enunciado = Column(Text, nullable=False)
     nivel_dificuldade = Column(String)
     solucao_esperada = Column(Text)
+    pontuacao_minima = Column(Integer, default=0) #new
 
     estrutura_id = Column(Integer, ForeignKey('estrutura_dado.id'))
     estrutura = relationship("EstruturaDeDado", back_populates="exercicios")
@@ -108,6 +109,7 @@ class Aluno(Base):
     nivel_conhecimento = Column(Integer, nullable=False, default=1)
     historico = relationship("HistoricoDesempenho", back_populates="aluno")
     tentativas = relationship("TentativaAluno", back_populates="aluno")
+    pontuacao_total = Column(Integer, default=0)  #new 
 
 class HistoricoDesempenho(Base):
     __tablename__ = 'historico_desempenho'

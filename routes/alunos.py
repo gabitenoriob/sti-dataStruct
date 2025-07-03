@@ -89,3 +89,17 @@ def pedir_feedback(aluno_id: int, exercicio_id: int, codigo: str, db: Session = 
 
     feedback = fornecer_feedback_aluno(exercicio_id=exercicio_id, resposta_aluno=codigo)
     return {"aluno_id": aluno_id, "exercicio_id": exercicio_id, "feedback": feedback}
+
+
+#new route get pontuacao total:
+@router.get("/{aluno_id}/pontuacao_total")
+def get_pontuacao_total(aluno_id: int, db: Session = Depends(get_db)):
+    aluno = crud_alunos.get_aluno(db, aluno_id)
+    if aluno is None:
+        raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    
+    return {
+        "aluno_id": aluno.id,
+        "nome": aluno.nome,
+        "pontuacao_total": aluno.pontuacao_total or 0
+    }
