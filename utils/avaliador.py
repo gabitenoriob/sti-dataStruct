@@ -6,7 +6,8 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from models import Exercicio, CasoTeste, TentativaAluno, Aluno
-from pontuacao import update_pontuacao, calcular_pontuacao
+# from pontuacao import update_pontuacao, calcular_pontuacao
+from .pontuacao import update_pontuacao, calcular_pontuacao
 
 
 def reformatar_codigo(codigo: str) -> str:
