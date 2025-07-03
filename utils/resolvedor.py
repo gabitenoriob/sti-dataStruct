@@ -1,11 +1,11 @@
 import os
 import google.generativeai as genai
+import re
 from sqlalchemy.orm import Session
 from db.db_config import get_db
 from models import Exercicio, CasoTeste
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 
@@ -18,14 +18,11 @@ def gerar_codigo(exercicio_id: int):
     db: Session = next(get_db())
 
     try:
-        # Busca o exercício no banco
         exercicio = db.query(Exercicio).filter(Exercicio.id == exercicio_id).first()
         if not exercicio:
             raise ValueError(f"Exercício com id {exercicio_id} não encontrado.")
 
-        # Busca os casos de teste
         casos = db.query(CasoTeste).filter(CasoTeste.exercicio_id == exercicio_id).all()
-
         casos_texto = "\n".join([f"Input: {c.entrada}\nExpected Output: {c.saida_esperada}" for c in casos])
 
         prompt = f"""
@@ -43,31 +40,40 @@ A função deve passar nos seguintes casos de teste. Inclua a função e chamada
 Escreva apenas o código Python dentro de um bloco de código markdown. Não adicione nenhuma explicação fora do bloco de código.
 """
 
-        # Usa o modelo direto
         model = genai.GenerativeModel("gemini-1.5-flash")
 
-        response = model.generate_content(
-            prompt,
-            # tools=[genai.tools.CodeExecutionTool()]
-        )
+        response = model.generate_content(prompt) # No need for empty tools=[]
 
+        full_text_response_content = ""
         codigo_gerado = None
-        output_execucao = None
+        output_execucao = None # Still likely None as CodeExecutionTool is commented out
 
+        # Iterate through all parts to reconstruct the full text and find code blocks
         for part in response.candidates[0].content.parts:
-            if part.executable_code:
-                codigo_gerado = part.executable_code.code
-            if part.code_execution_result:
-                output_execucao = part.code_execution_result.output
+            if hasattr(part, 'text'): # Check if the part has a 'text' attribute
+                full_text_response_content += part.text
+            # You can also keep your original logic if you expect executable_code parts
+            if hasattr(part, 'executable_code') and part.executable_code:
+                 # This might capture it if the model specifically formats it this way
+                 # However, regex from full_text_response_content is more reliable for markdown
+                 pass # We'll rely on regex for code extraction below
+
+        # Use regex to extract code from the accumulated text content
+        match = re.search(r"```python\n(.*?)```", full_text_response_content, re.DOTALL)
+
+        if match:
+            codigo_gerado = match.group(1).strip()
 
         if not codigo_gerado:
-            raise ValueError("Não foi possível gerar o código.")
+            raise ValueError(
+                "Não foi possível gerar o código. "
+                "Nenhum bloco de código Python em Markdown foi encontrado na resposta do LLM."
+            )
 
         return {
             "codigo": codigo_gerado,
             "resultado_execucao": output_execucao
         }
-
 
     finally:
         db.close()
