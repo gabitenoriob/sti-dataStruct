@@ -24,4 +24,4 @@ class TentativaCreate(TentativaBase):
 class Tentativa(TentativaBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
