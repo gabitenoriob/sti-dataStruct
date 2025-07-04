@@ -61,8 +61,9 @@ with col2:
         )
         if res.status_code == 200:
             r = res.json()
+            print(r)
             st.markdown("### ✅ Solução:")
-            st.info(r["feedback"])
+            st.info(r["resolucao_llm"])
         else:
             st.error("Erro ao obter feedback.")
             st.text(f"Status: {res.status_code}")
