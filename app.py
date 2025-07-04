@@ -1,13 +1,8 @@
-
-#rodar app:
-# uvicorn main:app --reload
-# streamlit run app.py
-
-
 import streamlit as st
 import requests
 
-BASE_URL = "http://127.0.0.1:8000" 
+BASE_URL = "http://127.0.0.1:8000"
+
 st.title("Portal do Aluno")
 
 st.sidebar.header("Ações")
@@ -28,14 +23,43 @@ st.subheader("Submeter Código")
 exercicio_id = st.number_input("ID do Exercício", min_value=1, step=1)
 codigo = st.text_area("Cole seu código aqui:", height=200)
 
-if st.button("Avaliar Código"):
-    payload = {"aluno_id": aluno_id, "exercicio_id": exercicio_id, "codigo": codigo}
-    res = requests.post(f"{BASE_URL}/tentativas/avaliar", json=payload)
-    if res.status_code == 200:
-        r = res.json()
-        st.success(f"Passou nos testes? {'Sim' if r['passou_testes'] else 'Não'}")
-        st.info(f"Pontos ganhos: {r['pontos_ganhos']}")
-    else:
-        st.error("Erro ao avaliar o código.")
+col1, col2, col3 = st.columns(3)
 
+with col1:
+    if st.button("Avaliar Código"):
+        payload = {"aluno_id": aluno_id, "exercicio_id": exercicio_id, "codigo": codigo}
+        res = requests.post(f"{BASE_URL}/tentativas/avaliar", json=payload)
+        if res.status_code == 200:
+            r = res.json()
+            st.success(f"Passou nos testes? {'Sim' if r['passou_testes'] else 'Não'}")
+            st.info(f"Pontos ganhos: {r['pontos_ganhos']}")
+        else:
+            st.error("Erro ao avaliar o código.")
 
+with col2:
+    if st.button("Obter Feedback da IA"):
+        payload = {
+            "exercicio_id": exercicio_id,
+            "codigo": codigo
+        }
+        res = requests.post(f"{BASE_URL}/alunos/{aluno_id}/feedback", json=payload)
+        if res.status_code == 200:
+            r = res.json()
+            st.markdown("### 💡 Feedback:")
+            st.info(r["feedback"])
+        else:
+            st.error("Erro ao obter feedback.")
+
+with col3:
+    if st.button("Ver Dicas do Exercício"):
+        res = requests.get(f"{BASE_URL}/exercicios/{exercicio_id}/dicas")
+        if res.status_code == 200:
+            dicas = res.json()
+            if dicas:
+                st.markdown("### 📌 Dicas:")
+                for i, dica in enumerate(dicas, 1):
+                    st.markdown(f"**Dica {i}:** {dica['conteudo']}")
+            else:
+                st.info("Nenhuma dica cadastrada para este exercício.")
+        else:
+            st.error("Erro ao buscar dicas.")

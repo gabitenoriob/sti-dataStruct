@@ -110,7 +110,7 @@ def avaliar_tentativa(db: Session, exercicio_id: int, aluno_id: int, codigo_alun
         ).count()
 
         pontos = 0
-        if passou_todos and tentativas_anteriores == 0:
+        if passou_todos: #and tentativas_anteriores == 0
             aluno = db.query(Aluno).get(aluno_id)
             update_pontuacao(db, aluno=aluno, exercicio=exercicio)
             pontos = calcular_pontuacao(exercicio)
