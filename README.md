@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # STI - Estrutura de Dados com Avaliação Inteligente
 
 Este projeto é uma plataforma de exercícios de estrutura de dados com feedback automatizado e gamificação da aprendizagem.
@@ -117,5 +116,3 @@ sti-dataStruct/
 - Two Sum
 - Top K Frequent Elements
 - Reverse Linked List
-=======
->>>>>>> 17a05b88fcb07c42db3906088848ed3e3033852
