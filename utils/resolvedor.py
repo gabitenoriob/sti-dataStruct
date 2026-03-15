@@ -1,5 +1,6 @@
 import os
-import google.generativeai as genai
+import google.genai as genai
+from google.genai import types
 import re
 from sqlalchemy.orm import Session
 from db.db_config import get_db
@@ -12,7 +13,7 @@ api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     raise ValueError("API key do Google não encontrada. Verifique seu arquivo .env")
 
-genai.configure(api_key=api_key)
+client= genai.Client(api_key=api_key)
 
 def gerar_codigo(exercicio_id: int):
     db: Session = next(get_db())
@@ -40,9 +41,12 @@ A função deve passar nos seguintes casos de teste. Inclua a função e chamada
 Escreva apenas o código Python dentro de um bloco de código markdown. Não adicione nenhuma explicação fora do bloco de código.
 """
 
-        model = genai.GenerativeModel("gemini-1.5-flash")
 
-        response = model.generate_content(prompt) # No need for empty tools=[]
+        response = client.models.generate_content(
+            model='gemini-2.5-flash', 
+            contents=types.Part.from_text(text=prompt))
+        
+        
 
         full_text_response_content = ""
         codigo_gerado = None
@@ -76,4 +80,5 @@ Escreva apenas o código Python dentro de um bloco de código markdown. Não adi
         }
 
     finally:
+        client.close()
         db.close()

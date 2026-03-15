@@ -3,7 +3,7 @@ import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 
-st.title("Portal do Aluno")
+st.title("Tutor Inteligente de Programação")
 
 st.sidebar.header("Ações")
 
@@ -19,8 +19,16 @@ if st.sidebar.button("Ver Pontuação Total"):
         st.error("Aluno não encontrado")
 
 # Submeter código para avaliação
-st.subheader("Submeter Código")
-exercicio_id = st.number_input("ID do Exercício", min_value=1, step=1)
+
+exercicio_id = st.number_input("Selecione o Exercício:", min_value=1, step=1)
+
+res = requests.get(f"{BASE_URL}/exercicios/{exercicio_id}")
+enun=res.json()
+enunciado_id = st.markdown(f""" ### Exercício {exercicio_id}: {enun['enunciado']}
+
+                            """
+                           )
+st.subheader("Submeter Código:")
 codigo = st.text_area("Cole seu código aqui:", height=200)
 
 col1, col2, col3 = st.columns(3)
@@ -38,28 +46,48 @@ with col1:
 
 with col2:
     if st.button("Obter Feedback da IA"):
-        payload = {
+        params = {
             "exercicio_id": exercicio_id,
             "codigo": codigo
         }
-        res = requests.post(f"{BASE_URL}/alunos/{aluno_id}/feedback", json=payload)
+        res = requests.post(f"{BASE_URL}/alunos/{aluno_id}/feedback", params=params)
         if res.status_code == 200:
             r = res.json()
             st.markdown("### 💡 Feedback:")
             st.info(r["feedback"])
         else:
             st.error("Erro ao obter feedback.")
+            st.text(f"Status: {res.status_code}")
+            st.text(f"Resposta: {res.text}")
+    if st.button("Desistir e Ver Resposta"):
+        params = {
+            "codigo": codigo
+        }
+        res = requests.post(
+            f"{BASE_URL}/alunos/{aluno_id}/exercicios/{exercicio_id}/resolver",
+            params=params
+        )
+        if res.status_code == 200:
+            r = res.json()
+            print(r)
+            st.markdown("### ✅ Solução:")
+            st.info(r["resolucao_llm"])
+        else:
+            st.error("Erro ao obter feedback.")
+            st.text(f"Status: {res.status_code}")
+            st.text(f"Resposta: {res.text}")
 
 with col3:
     if st.button("Ver Dicas do Exercício"):
-        res = requests.get(f"{BASE_URL}/exercicios/{exercicio_id}/dicas")
+        params = {
+            "exercicio_id": exercicio_id,
+            'codigo': "enumere dicas curtas para resolver esse exercício"
+        }
+        res = requests.post(f"{BASE_URL}/alunos/{aluno_id}/feedback", params=params)
         if res.status_code == 200:
             dicas = res.json()
             if dicas:
                 st.markdown("### 📌 Dicas:")
-                for i, dica in enumerate(dicas, 1):
-                    st.markdown(f"**Dica {i}:** {dica['conteudo']}")
-            else:
-                st.info("Nenhuma dica cadastrada para este exercício.")
+                st.info(dicas["feedback"])                
         else:
             st.error("Erro ao buscar dicas.")

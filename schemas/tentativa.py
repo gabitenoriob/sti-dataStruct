@@ -13,6 +13,7 @@ class TentativaBase(BaseModel):
     # Campos para a solução gerada pela LLM
     resolucao_llm: str
     resultado_execucao_llm: Optional[str] # Opcional, pois pode não haver resultado de execução da LLM
+    pontuacao_minima: Optional[int] = 0
 
     class Config:
         from_attributes = True

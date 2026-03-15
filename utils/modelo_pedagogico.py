@@ -1,5 +1,6 @@
 import os
-import google.generativeai as genai
+import google.genai as genai
+from google.genai import types
 from sqlalchemy.orm import Session
 from db.db_config import get_db
 from models import Dicas, Exercicio, CasoTeste
@@ -8,11 +9,12 @@ from dotenv import load_dotenv
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
+print(f"APIKEY ---------------------->{api_key}")
 
 # Configurar a API key do Google GenAI
 if not api_key:
     raise ValueError("API key do Google não encontrada. Verifique seu arquivo .env")
-genai.configure(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
 # --- Função anterior (gerar_codigo) pode ser mantida aqui se desejar ---
 
@@ -83,10 +85,19 @@ def fornecer_feedback_aluno(exercicio_id: int, resposta_aluno: str) -> str:
             """
         
         # 3. Chamar o modelo Gemini
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
+        '''
+        response = client.models.generate_content(
+            model='gemini-2.0-flash', 
+            contents=types.Part.from_text(text=prompt))
+        '''
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        
         
         return response.text
     
     finally:
+        client.close()
         db.close() # Garante que a conexão com o banco seja sempre fechada

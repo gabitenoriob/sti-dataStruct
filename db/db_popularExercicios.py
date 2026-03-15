@@ -78,6 +78,7 @@ def processar_txts():
             caminho = os.path.join(FOLDER, arquivo)
             with open(caminho, 'r', encoding='utf-8') as file:
                 conteudo = file.read()
+                #print(conteudo)
                 dados.append(extrair_dados(conteudo))
     return dados
 
@@ -98,7 +99,7 @@ def inserir_no_banco(lista_exercicios):
                 ex["espaco_ideal"]
             ))
             exercicio_id = cursor.fetchone()[0]
-
+            
             # Inserindo casos de teste
             for ct in ex["casos_teste"]:
                 cursor.execute("""
@@ -131,7 +132,7 @@ def inserir_no_banco(lista_exercicios):
 if __name__ == "__main__":
     print("Processando arquivos .txt...")
     dados = processar_txts()
-
+    #print(dados)
     print(f"{len(dados)} exercícios encontrados. Inserindo no banco...")
     with open("exercicios_extraidos.json", "w", encoding="utf-8") as f:
         json.dump(dados, f, indent=4, ensure_ascii=False)
